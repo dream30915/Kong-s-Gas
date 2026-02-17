@@ -47,7 +47,7 @@ export default function DeliveryPage() {
                 setGps(finalGps);
             }
 
-            const tx = processDelivery(
+            const tx = await processDelivery(
                 customerId,
                 items,
                 photo,
@@ -153,7 +153,9 @@ export default function DeliveryPage() {
         <div className="page-container">
             <div className="page-header">
                 <Link href="/">
-                    <button className="back-btn" type="button">←</button>
+                    <button className="back-btn" type="button">
+                        ←
+                    </button>
                 </Link>
                 <h1>📦 เบิกสินค้า / ส่งของ</h1>
             </div>
@@ -192,13 +194,19 @@ export default function DeliveryPage() {
                         <ProductSelector selectedItems={items} onChange={setItems} />
                     </div>
                     <div className="grid-2 mt-lg">
-                        <button className="btn btn-secondary" onClick={() => setStep('customer')}>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => setStep('customer')}
+                        >
                             ← ย้อนกลับ
                         </button>
                         <button
                             className="btn btn-primary"
                             disabled={!canProceedFromProducts}
-                            onClick={() => { captureGPS(); setStep('proof'); }}
+                            onClick={() => {
+                                captureGPS();
+                                setStep('proof');
+                            }}
                         >
                             ถัดไป →
                         </button>
@@ -248,7 +256,10 @@ export default function DeliveryPage() {
                     </div>
 
                     <div className="grid-2 mt-lg">
-                        <button className="btn btn-secondary" onClick={() => setStep('products')}>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => setStep('products')}
+                        >
                             ← ย้อนกลับ
                         </button>
                         <button

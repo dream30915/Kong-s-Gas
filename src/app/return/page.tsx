@@ -39,7 +39,7 @@ export default function ReturnPage() {
                 isDamaged: damageFlags[item.productId] || false,
             }));
 
-            const tx = processReturn(customerId, returnItems, damagePhoto || undefined);
+            const tx = await processReturn(customerId, returnItems, damagePhoto || undefined);
             setResult(tx);
             setStep('success');
         } catch (e) {
@@ -116,7 +116,9 @@ export default function ReturnPage() {
         <div className="page-container">
             <div className="page-header">
                 <Link href="/">
-                    <button className="back-btn" type="button">←</button>
+                    <button className="back-btn" type="button">
+                        ←
+                    </button>
                 </Link>
                 <h1>♻️ รับถังคืน</h1>
             </div>
@@ -201,7 +203,10 @@ export default function ReturnPage() {
                     )}
 
                     <div className="grid-2 mt-lg">
-                        <button className="btn btn-secondary" onClick={() => setStep('customer')}>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => setStep('customer')}
+                        >
                             ← ย้อนกลับ
                         </button>
                         <button
