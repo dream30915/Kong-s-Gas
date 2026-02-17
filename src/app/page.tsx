@@ -10,8 +10,10 @@ export default function HomePage() {
     const [stockWarning, setStockWarning] = useState(false);
 
     useEffect(() => {
-        const summary = getStockSummary();
-        setStockWarning(summary.some((s) => s.isLow));
+        (async () => {
+            const summary = await getStockSummary();
+            setStockWarning(summary.some((s) => s.isLow));
+        })();
     }, []);
 
     const handleLogoTap = () => {
@@ -86,7 +88,7 @@ export default function HomePage() {
 
             <div style={{ textAlign: 'center', marginTop: 'var(--space-2xl)', paddingTop: 'var(--space-lg)' }}>
                 <p className="text-muted" style={{ fontSize: '0.75rem' }}>
-                    v1.0 • Pro Gas & Asset Management
+                    v1.0 • Pro Gas &amp; Asset Management
                 </p>
             </div>
         </div>
