@@ -22,7 +22,6 @@ export default function AdminPage() {
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handlePin = () => {
-        // Simple PIN check — default 00000
         if (pin === '00000') {
             setAuthenticated(true);
             setPinError(false);
@@ -107,8 +106,14 @@ export default function AdminPage() {
 }
 
 function AssetMatrixTab() {
-    const [matrix, setMatrix] = useState<ReturnType<typeof getAssetMatrix>>([]);
-    useEffect(() => { setMatrix(getAssetMatrix()); }, []);
+    const [matrix, setMatrix] = useState<Awaited<ReturnType<typeof getAssetMatrix>>>([]);
+
+    useEffect(() => {
+        (async () => {
+            setMatrix(await getAssetMatrix());
+        })();
+    }, []);
+
     const totalDebt = matrix.reduce((sum, m) => sum + m.total, 0);
 
     return (
@@ -117,6 +122,7 @@ function AssetMatrixTab() {
                 <div className="stat-value" style={{ fontSize: '2.5rem' }}>{totalDebt}</div>
                 <div className="stat-label">ถังค้างทั้งหมด</div>
             </div>
+
             <div className="flex-col">
                 {matrix.map((row) => (
                     <div key={row.customer.id} className="card" style={{ padding: 'var(--space-md)' }}>
@@ -132,8 +138,12 @@ function AssetMatrixTab() {
                             <div>
                                 {row.debts.map((d) => (
                                     <div key={d.product.id} className="flex-between" style={{ padding: '4px 0' }}>
-                                        <span className="text-secondary fs-sm">{d.product.icon} {d.product.nameTh}</span>
-                                        <span className="fw-bold text-accent">{d.quantity} {d.product.unit}</span>
+                                        <span className="text-secondary fs-sm">
+                                            {d.product.icon} {d.product.nameTh}
+                                        </span>
+                                        <span className="fw-bold text-accent">
+                                            {d.quantity} {d.product.unit}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -148,8 +158,13 @@ function AssetMatrixTab() {
 }
 
 function StockTab() {
-    const [stocks, setStocks] = useState<ReturnType<typeof getStockSummary>>([]);
-    useEffect(() => { setStocks(getStockSummary()); }, []);
+    const [stocks, setStocks] = useState<Awaited<ReturnType<typeof getStockSummary>>>([]);
+
+    useEffect(() => {
+        (async () => {
+            setStocks(await getStockSummary());
+        })();
+    }, []);
 
     return (
         <div>
@@ -162,15 +177,21 @@ function StockTab() {
                         </div>
                         <div className="grid-3" style={{ gap: 'var(--space-sm)' }}>
                             <div className="stat-card">
-                                <div className={`stat-value ${s.isLow ? 'stock-low' : ''}`} style={{ fontSize: '1.5rem' }}>{s.full}</div>
+                                <div className={`stat-value ${s.isLow ? 'stock-low' : ''}`} style={{ fontSize: '1.5rem' }}>
+                                    {s.full}
+                                </div>
                                 <div className="stat-label">ถังเต็ม</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-value" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }}>{s.empty}</div>
+                                <div className="stat-value" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }}>
+                                    {s.empty}
+                                </div>
                                 <div className="stat-label">ถังเปล่า</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-value" style={{ fontSize: '1.5rem', color: s.repair > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>{s.repair}</div>
+                                <div className="stat-value" style={{ fontSize: '1.5rem', color: s.repair > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
+                                    {s.repair}
+                                </div>
                                 <div className="stat-label">ซ่อม</div>
                             </div>
                         </div>
@@ -183,7 +204,12 @@ function StockTab() {
 
 function HistoryTab({ onView }: { onView: (tx: Transaction) => void }) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    useEffect(() => { setTransactions(getTransactions()); }, []);
+
+    useEffect(() => {
+        (async () => {
+            setTransactions(await getTransactions());
+        })();
+    }, []);
 
     if (transactions.length === 0) {
         return (
@@ -199,7 +225,12 @@ function HistoryTab({ onView }: { onView: (tx: Transaction) => void }) {
             {transactions.slice(0, 50).map((tx) => {
                 const customer = CUSTOMERS.find((c) => c.id === tx.customerId);
                 const date = new Date(tx.createdAt);
-                const dateStr = date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
 
                 return (
                     <div key={tx.id} className="tx-card" onClick={() => onView(tx)} style={{ cursor: 'pointer' }}>
@@ -238,16 +269,24 @@ function HistoryTab({ onView }: { onView: (tx: Transaction) => void }) {
 function TransactionModal({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
     const customer = CUSTOMERS.find((c) => c.id === tx.customerId);
     const date = new Date(tx.createdAt);
-    const dateStr = date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const dateStr = date.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-handle" />
+
                 <div className="flex-between mb-lg">
                     <h2>{tx.type === 'delivery' ? '📦 ใบส่งของ' : '♻️ ใบรับคืน'}</h2>
                     <button className="btn-ghost" onClick={onClose} style={{ width: 'auto', fontSize: '1.5rem' }}>✕</button>
                 </div>
+
                 <div className="flex-col" style={{ gap: 'var(--space-md)' }}>
                     <div className="flex-between">
                         <span className="text-muted">เลขที่</span>
@@ -261,6 +300,7 @@ function TransactionModal({ tx, onClose }: { tx: Transaction; onClose: () => voi
                         <span className="text-muted">ลูกค้า</span>
                         <span className="fw-bold">{customer?.nameTh}</span>
                     </div>
+
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-md)' }}>
                         <span className="form-label">รายการ</span>
                         {tx.items.map((item, i) => {
@@ -276,6 +316,7 @@ function TransactionModal({ tx, onClose }: { tx: Transaction; onClose: () => voi
                             );
                         })}
                     </div>
+
                     {tx.gpsLat && tx.gpsLng && (
                         <div>
                             <span className="form-label">📍 ตำแหน่ง</span>
@@ -290,17 +331,27 @@ function TransactionModal({ tx, onClose }: { tx: Transaction; onClose: () => voi
                             </a>
                         </div>
                     )}
+
                     {tx.photoUrl && (
                         <div>
                             <span className="form-label">📷 รูปถ่าย</span>
-                            <img src={tx.photoUrl} alt="Delivery photo" style={{ width: '100%', borderRadius: 'var(--radius-md)', maxHeight: '300px', objectFit: 'contain', background: 'var(--bg-input)' }} />
+                            <img
+                                src={tx.photoUrl}
+                                alt="Delivery photo"
+                                style={{ width: '100%', borderRadius: 'var(--radius-md)', maxHeight: '300px', objectFit: 'contain', background: 'var(--bg-input)' }}
+                            />
                         </div>
                     )}
+
                     {tx.signatureUrl && (
                         <div>
                             <span className="form-label">✍️ ลายเซ็นผู้รับ</span>
                             <div style={{ background: 'white', borderRadius: 'var(--radius-md)', padding: 'var(--space-sm)' }}>
-                                <img src={tx.signatureUrl} alt="Signature" style={{ width: '100%', maxHeight: '150px', objectFit: 'contain' }} />
+                                <img
+                                    src={tx.signatureUrl}
+                                    alt="Signature"
+                                    style={{ width: '100%', maxHeight: '150px', objectFit: 'contain' }}
+                                />
                             </div>
                         </div>
                     )}
